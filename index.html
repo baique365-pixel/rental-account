@@ -190,7 +190,7 @@
 
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 6px;
     }
@@ -268,7 +268,7 @@
 
     .pill-filter button.active {
       background: #fff;
-      color: var(--primary);
+      color: #1d4ed8;
       font-weight: 500;
       box-shadow: 0 1px 3px rgba(15,23,42,0.12);
     }
@@ -279,6 +279,11 @@
       border: 1px solid var(--border);
       overflow: hidden;
       background: #f9fafb;
+    }
+
+    .table-wrapper.small-table {
+      max-height: 260px;
+      margin-top: 6px;
     }
 
     table {
@@ -335,12 +340,16 @@
       border-color: #fecaca;
     }
 
-    .tag-chip {
-      padding: 1px 6px;
-      font-size: 11px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      color: var(--text-sub);
+    .tag-move-out {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .tag-move-back {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #bae6fd;
     }
 
     .td-actions {
@@ -392,8 +401,8 @@
 </head>
 <body>
 <header>
-  <h1>租赁项目 · 账目 & 进出统计</h1>
-  <p>记录每一笔租赁相关流水，自动统计收入、支出与净收益（本页数据保存在浏览器本地）。</p>
+  <h1>租赁项目 · 账目 & 设备统计</h1>
+  <p>记录每一笔租赁流水，自动统计收入、支出、设备出/回与当前在外设备数量。</p>
 </header>
 
 <div class="page">
@@ -418,6 +427,19 @@
         <div class="field">
           <label for="customer">客户信息</label>
           <input type="text" id="customer" name="customer" placeholder="姓名 / 电话 / 公司">
+        </div>
+
+        <div class="field">
+          <label for="deviceId">设备编号（1~16）</label>
+          <input type="text" id="deviceId" name="deviceId" placeholder="例如：1 / A01">
+        </div>
+
+        <div class="field">
+          <label for="moveType">设备出入类型</label>
+          <select id="moveType" name="moveType">
+            <option value="out">设备出库 / 出租</option>
+            <option value="back">设备回库 / 归还</option>
+          </select>
         </div>
 
         <div class="field">
@@ -459,19 +481,20 @@
       </form>
 
       <p class="small">
-        小提示：<br>
-        · “金额”通过“收支类型”区分收入 / 支出，例如租金收入、押金、退款等。<br>
-        · 邮费统一视为支出，自动计入总支出和净收益计算。
+        使用说明：<br>
+        · 每条记录请选择“设备编号”和“设备出入类型”（出库 / 回库），系统会自动计算每天出去/回来多少台。<br>
+        · 设备总数默认是 16 台，如有变化可以在代码顶部的 <code>TOTAL_DEVICES</code> 修改。
       </p>
     </div>
 
     <!-- 右侧：统计信息 & 操作 -->
     <div class="card">
       <div class="card-title">
-        收入 / 支出统计
-        <span class="badge">自动汇总</span>
+        汇总统计
+        <span class="badge">金额 & 设备</span>
       </div>
 
+      <!-- 金额统计 -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">记录数量</div>
@@ -485,28 +508,36 @@
           <div class="stat-label">总支出（金额＋邮费）</div>
           <div class="stat-value stat-expense" id="statExpense">￥0.00</div>
         </div>
+      </div>
+
+      <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">净收益（收入 - 支出）</div>
           <div class="stat-value stat-balance" id="statBalance">￥0.00</div>
         </div>
-      </div>
-
-      <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">邮费合计</div>
           <div class="stat-value" id="statShipping">￥0.00</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">收入笔数</div>
-          <div class="stat-value" id="statIncomeCount">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">支出笔数</div>
-          <div class="stat-value" id="statExpenseCount">0</div>
-        </div>
-        <div class="stat-card">
           <div class="stat-label">最近一笔时间</div>
           <div class="stat-value" id="statLastTime">—</div>
+        </div>
+      </div>
+
+      <!-- 设备统计 -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">设备总数</div>
+          <div class="stat-value" id="statDeviceTotal">16</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">当前在外设备数</div>
+          <div class="stat-value" id="statDeviceOut">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">当前在库设备数</div>
+          <div class="stat-value" id="statDeviceIn">16</div>
         </div>
       </div>
 
@@ -515,7 +546,7 @@
       <div class="table-toolbar">
         <div class="toolbar-left">
           <div class="pill-filter" id="filterGroup">
-            <button type="button" data-filter="all" class="active">全部</button>
+            <button type="button" data-filter="all" class="active">全部记录</button>
             <button type="button" data-filter="income">仅收入</button>
             <button type="button" data-filter="expense">仅支出</button>
           </div>
@@ -527,12 +558,36 @@
       </div>
 
       <p class="small">
-        数据仅保存在当前浏览器（localStorage），更换浏览器或清理浏览数据会丢失记录。建议定期用“导出 CSV”备份到 Excel。
+        金额与设备记录均保存在本机浏览器（localStorage），清空浏览数据或更换设备后记录会丢失，请定期导出 CSV 备份。
       </p>
+
+      <!-- 每日设备出入统计 -->
+      <div style="margin-top:10px;">
+        <div class="card-title" style="margin-bottom:4px;">
+          每日设备出/回统计
+          <span class="badge">按日期汇总</span>
+        </div>
+        <div class="table-wrapper small-table">
+          <table>
+            <thead>
+            <tr>
+              <th>日期</th>
+              <th>出去台数</th>
+              <th>回来台数</th>
+              <th>当日净变化</th>
+              <th>累计在外</th>
+            </tr>
+            </thead>
+            <tbody id="dayStatsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- 表格区域 -->
+  <!-- 明细表格 -->
   <div class="card">
     <div class="card-title">
       记录明细
@@ -544,6 +599,8 @@
         <tr>
           <th>序列</th>
           <th>时间</th>
+          <th>设备编号</th>
+          <th>设备出入</th>
           <th>机型</th>
           <th>客户信息</th>
           <th>收支类型</th>
@@ -563,7 +620,8 @@
 </div>
 
 <script>
-  const STORAGE_KEY = 'account_records_v2';
+  const STORAGE_KEY = 'account_records_v3';
+  const TOTAL_DEVICES = 16; // 如果不是 16 台，在这里改
   let records = [];
   let currentFilter = 'all'; // all | income | expense
 
@@ -595,6 +653,13 @@
     );
   }
 
+  function getDateKey(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr.slice(0, 10);
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
   function getFilteredRecords() {
     if (currentFilter === 'all') return records;
     return records.filter(r => r.ioType === currentFilter);
@@ -615,6 +680,19 @@
       const timeTd = document.createElement('td');
       timeTd.textContent = formatDate(r.time);
       tr.appendChild(timeTd);
+
+      const deviceIdTd = document.createElement('td');
+      deviceIdTd.textContent = r.deviceId || '';
+      tr.appendChild(deviceIdTd);
+
+      const moveTd = document.createElement('td');
+      if (r.moveType) {
+        const mv = document.createElement('span');
+        mv.className = 'tag ' + (r.moveType === 'out' ? 'tag-move-out' : 'tag-move-back');
+        mv.textContent = r.moveType === 'out' ? '出库/出租' : '回库/归还';
+        moveTd.appendChild(mv);
+      }
+      tr.appendChild(moveTd);
 
       const modelTd = document.createElement('td');
       modelTd.textContent = r.model || '';
@@ -684,7 +762,68 @@
       tbody.appendChild(tr);
     });
 
-    document.getElementById('recordSummary').textContent = `共 ${records.length} 条（当前显示：${list.length} 条）`;
+    document.getElementById('recordSummary').textContent =
+      `共 ${records.length} 条（当前显示：${list.length} 条）`;
+  }
+
+  function computeDayStats() {
+    const map = {};
+    records.forEach(r => {
+      if (!r.time || !r.moveType) return;
+      const key = getDateKey(r.time);
+      if (!key) return;
+      if (!map[key]) map[key] = { out: 0, back: 0 };
+      if (r.moveType === 'out') map[key].out += 1;
+      if (r.moveType === 'back') map[key].back += 1;
+    });
+    return map;
+  }
+
+  function renderDayStats() {
+    const tbody = document.getElementById('dayStatsBody');
+    tbody.innerHTML = '';
+    const map = computeDayStats();
+    const dates = Object.keys(map).sort();
+
+    let running = 0;
+    dates.forEach(date => {
+      const { out, back } = map[date];
+      const delta = out - back;
+      running += delta;
+
+      const tr = document.createElement('tr');
+
+      const dateTd = document.createElement('td');
+      dateTd.textContent = date;
+      tr.appendChild(dateTd);
+
+      const outTd = document.createElement('td');
+      outTd.textContent = out;
+      tr.appendChild(outTd);
+
+      const backTd = document.createElement('td');
+      backTd.textContent = back;
+      tr.appendChild(backTd);
+
+      const deltaTd = document.createElement('td');
+      deltaTd.textContent = (delta >= 0 ? '+' : '') + delta;
+      tr.appendChild(deltaTd);
+
+      const runTd = document.createElement('td');
+      runTd.textContent = running;
+      tr.appendChild(runTd);
+
+      tbody.appendChild(tr);
+    });
+
+    if (dates.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.textContent = '暂无数据';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
   }
 
   function updateStats() {
@@ -694,6 +833,8 @@
     let totalShipping = 0;
     let incomeCount = 0;
     let expenseCount = 0;
+
+    let deviceDelta = 0; // 出库 +1，回库 -1
 
     records.forEach(r => {
       const amount = r.amount || 0;
@@ -708,6 +849,9 @@
       if (!isNaN(shipping)) {
         totalShipping += shipping;
       }
+
+      if (r.moveType === 'out') deviceDelta += 1;
+      if (r.moveType === 'back') deviceDelta -= 1;
     });
 
     const totalExpense = totalExpenseAmount + totalShipping;
@@ -718,15 +862,20 @@
     document.getElementById('statExpense').textContent = '￥' + totalExpense.toFixed(2);
     document.getElementById('statBalance').textContent = '￥' + balance.toFixed(2);
     document.getElementById('statShipping').textContent = '￥' + totalShipping.toFixed(2);
-    document.getElementById('statIncomeCount').textContent = incomeCount;
-    document.getElementById('statExpenseCount').textContent = expenseCount;
+    document.getElementById('statLastTime').textContent =
+      records.length > 0
+        ? formatDate([...records].sort((a, b) => new Date(b.time) - new Date(a.time))[0].time)
+        : '—';
 
-    if (records.length > 0) {
-      const sorted = [...records].sort((a, b) => new Date(b.time) - new Date(a.time));
-      document.getElementById('statLastTime').textContent = formatDate(sorted[0].time);
-    } else {
-      document.getElementById('statLastTime').textContent = '—';
-    }
+    // 设备统计
+    const currentOut = deviceDelta < 0 ? 0 : deviceDelta;
+    const currentIn = TOTAL_DEVICES - currentOut;
+
+    document.getElementById('statDeviceTotal').textContent = TOTAL_DEVICES;
+    document.getElementById('statDeviceOut').textContent = currentOut < 0 ? 0 : currentOut;
+    document.getElementById('statDeviceIn').textContent = currentIn < 0 ? 0 : currentIn;
+
+    renderDayStats();
   }
 
   function handleFormSubmit(e) {
@@ -736,6 +885,8 @@
     const time = form.time.value;
     const model = form.model.value.trim();
     const customer = form.customer.value.trim();
+    const deviceId = form.deviceId.value.trim();
+    const moveType = form.moveType.value || 'out';
     const ioType = form.ioType.value || 'income';
     const amount = parseFloat(form.amount.value || '0');
     const shipping = parseFloat(form.shipping.value || '0');
@@ -747,6 +898,8 @@
       time,
       model,
       customer,
+      deviceId,
+      moveType,
       ioType,
       amount: isNaN(amount) ? 0 : amount,
       shipping: isNaN(shipping) ? 0 : shipping,
@@ -761,6 +914,7 @@
     updateStats();
 
     form.reset();
+    document.getElementById('moveType').value = 'out';
     document.getElementById('ioType').value = 'income';
     document.getElementById('time').value = new Date().toISOString().slice(0, 16);
   }
@@ -774,6 +928,8 @@
     const header = [
       '序列',
       '时间',
+      '设备编号',
+      '设备出入',
       '机型',
       '客户信息',
       '收支类型',
@@ -787,6 +943,8 @@
     const rows = records.map((r, idx) => [
       idx + 1,
       formatDate(r.time),
+      r.deviceId || '',
+      r.moveType === 'out' ? '出库/出租' : '回库/归还',
       r.model || '',
       r.customer || '',
       r.ioType === 'income' ? '收入' : '支出',
@@ -851,6 +1009,7 @@
     bindFilterButtons();
 
     document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('statDeviceTotal').textContent = TOTAL_DEVICES;
   }
 
   document.addEventListener('DOMContentLoaded', init);
