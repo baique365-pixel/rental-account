@@ -2,56 +2,57 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>租赁项目账目 & 设备统计</title>
+  <title>租赁管理系统（可编辑）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-soft: #e0f2fe;
-      --primary-strong: #0ea5e9;
-      --accent: #f97316;
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --primary-soft: #dbeafe;
+      --success: #22c55e;
+      --warning: #f59e0b;
       --danger: #ef4444;
-      --bg: #0f172a;
-      --card-bg: rgba(15, 23, 42, 0.9);
-      --border: rgba(148, 163, 184, 0.4);
+      --cyan: #06b6d4;
+
+      --bg-dark: #020617;
+      --bg-card: #0f172a;
+      --bg-card-soft: #1e293b;
       --text-main: #f9fafb;
-      --text-sub: #cbd5f5;
-      --radius-lg: 16px;
+      --text-sub: #cbd5e1;
+      --border: rgba(148,163,184,0.35);
+      --radius: 14px;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
+      padding: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
         radial-gradient(circle at 0% 0%, #22c55e33, transparent 55%),
-        radial-gradient(circle at 100% 0%, #f9731633, transparent 55%),
-        radial-gradient(circle at 50% 120%, #3b82f633, transparent 55%),
+        radial-gradient(circle at 100% 10%, #f9731633, transparent 60%),
+        radial-gradient(circle at 50% 100%, #3b82f633, transparent 60%),
         #020617;
       color: var(--text-main);
     }
 
     header {
-      padding: 18px 20px 16px;
+      padding: 18px 20px 14px;
+      background: rgba(15,23,42,0.9);
+      backdrop-filter: blur(16px);
       position: sticky;
       top: 0;
-      z-index: 20;
-      backdrop-filter: blur(18px);
-      background: linear-gradient(
-        115deg,
-        rgba(15, 23, 42, 0.95),
-        rgba(30, 64, 175, 0.95),
-        rgba(59, 130, 246, 0.85)
-      );
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+      z-index: 50;
+      border-bottom: 1px solid rgba(148,163,184,0.4);
+      box-shadow: 0 10px 25px rgba(15,23,42,0.8);
     }
 
     header h1 {
       margin: 0;
       font-size: 22px;
-      letter-spacing: 0.08em;
+      letter-spacing: .08em;
       text-transform: uppercase;
       display: flex;
       align-items: center;
@@ -63,40 +64,36 @@
       height: 10px;
       border-radius: 999px;
       background: conic-gradient(from 180deg, #22c55e, #f97316, #3b82f6, #22c55e);
-      box-shadow: 0 0 12px #fbbf24;
+      box-shadow: 0 0 10px #fbbf24;
     }
 
     header p {
       margin: 4px 0 0;
       font-size: 13px;
-      opacity: 0.85;
+      color: var(--text-sub);
     }
 
     .page {
-      max-width: 1240px;
-      margin: 18px auto 32px;
-      padding: 0 16px 16px;
+      max-width: 1280px;
+      margin: 18px auto 28px;
+      padding: 0 16px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 18px;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
       margin-bottom: 16px;
     }
 
     .card {
-      border-radius: var(--radius-lg);
-      background: linear-gradient(
-          135deg,
-          rgba(248, 250, 252, 0.06),
-          rgba(15, 23, 42, 0.96)
-        );
+      background: var(--bg-card);
+      padding: 14px 16px 16px;
+      border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(148, 163, 184, 0.4);
-      padding: 14px 16px 16px;
+        0 18px 45px rgba(15,23,42,0.9),
+        0 0 0 1px rgba(15,23,42,0.8);
       position: relative;
       overflow: hidden;
     }
@@ -106,160 +103,161 @@
       position: absolute;
       inset: -40%;
       background:
-        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), transparent 52%),
-        radial-gradient(circle at 100% 0%, rgba(251, 146, 60, 0.12), transparent 50%);
-      opacity: 0.60;
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(251,146,60,0.14), transparent 55%);
+      opacity: 0.7;
       pointer-events: none;
       z-index: -1;
     }
 
     .card-title {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .card-title-left {
-      display: flex;
       align-items: center;
-      gap: 8px;
+      margin-bottom: 10px;
       font-size: 15px;
       font-weight: 600;
     }
 
-    .card-title-left span.pill {
+    .badge {
+      font-size: 11px;
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 11px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.7);
       color: #bfdbfe;
     }
 
-    .card-title-right {
+    .card-sub {
       font-size: 11px;
-      color: #e5e7eb;
-      opacity: 0.9;
+      color: var(--text-sub);
     }
 
+    /* 表单 */
     form {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px 12px;
-      margin-bottom: 4px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
     }
-
-    .field { display: flex; flex-direction: column; }
 
     label {
       font-size: 12px;
       color: var(--text-sub);
-      margin-bottom: 3px;
+      margin-bottom: 2px;
+      display: block;
     }
 
-    input, textarea, select {
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    input, select, textarea {
       width: 100%;
       padding: 7px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.65);
-      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      background: #020617;
       color: var(--text-main);
       font-size: 13px;
       outline: none;
-      transition: border-color .15s, box-shadow .15s, background .15s, transform .08s;
+      transition: border-color .15s, box-shadow .15s, background .15s, transform .07s;
     }
 
     textarea {
       border-radius: 10px;
-      min-height: 46px;
+      min-height: 48px;
       resize: vertical;
     }
 
-    input::placeholder,
-    textarea::placeholder { color: #6b7280; }
-
-    input:focus, textarea:focus, select:focus {
-      border-color: #38bdf8;
-      box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.5),
-        0 0 18px rgba(59, 130, 246, 0.4);
-      background: rgba(15, 23, 42, 0.98);
-      transform: translateY(-1px);
+    input::placeholder, textarea::placeholder {
+      color: #64748b;
     }
 
-    .full-row { grid-column: 1 / -1; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary-light);
+      box-shadow:
+        0 0 0 1px rgba(96,165,250,0.7),
+        0 0 18px rgba(37,99,235,0.5);
+      background: #020617;
+      transform: translateY(-1px);
+    }
 
     .form-footer {
       grid-column: 1 / -1;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
-    .btn {
+    /* 按钮 */
+    button {
       cursor: pointer;
-      border-radius: 999px;
-      padding: 7px 16px;
       border: none;
+      border-radius: 999px;
+      padding: 7px 14px;
       font-size: 13px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 4px;
+      transition: transform .08s, box-shadow .08s, opacity .15s;
       white-space: nowrap;
-      transition: transform .08s, box-shadow .08s, background .15s, opacity .2s;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #16a3f5);
-      color: white;
-      box-shadow: 0 10px 18px rgba(34, 197, 94, 0.5);
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #f9fafb;
+      box-shadow: 0 10px 20px rgba(37,99,235,0.7);
+      width: 100%;
     }
 
-    .btn-primary:hover {
-      opacity: 0.95;
-      transform: translateY(-1px);
-    }
+    .btn-primary:hover { opacity: .96; transform: translateY(-1px); }
 
     .btn-secondary {
-      background: rgba(15, 23, 42, 0.9);
+      background: #1f2937;
       color: #e5e7eb;
-      border: 1px solid rgba(148, 163, 184, 0.7);
+      border: 1px solid rgba(148,163,184,0.8);
     }
 
     .btn-danger {
-      background: #ef4444;
-      color: white;
-      box-shadow: 0 8px 16px rgba(248, 113, 113, 0.55);
+      background: #dc2626;
+      color: #fef2f2;
+      box-shadow: 0 7px 14px rgba(248,113,113,0.6);
     }
 
     .btn-ghost {
       background: transparent;
       color: #e5e7eb;
-      border: 1px solid rgba(148, 163, 184, 0.6);
+      border: 1px solid rgba(148,163,184,0.6);
     }
 
-    .btn:active {
+    .btn-edit { background: #0ea5e9; color: #f9fafb; }
+    .btn-return { background: #22c55e; color: #022c22; }
+
+    button:active {
       transform: translateY(1px);
       box-shadow: none;
     }
 
     .small {
-      font-size: 12px;
-      color: #9ca3af;
       margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
       line-height: 1.5;
     }
 
     .small code {
-      padding: 1px 4px;
-      border-radius: 4px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 1px 5px;
+      border-radius: 6px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.6);
       font-size: 11px;
     }
 
+    /* 统计卡片 */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -268,26 +266,23 @@
     }
 
     .stat-card {
-      border-radius: 13px;
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.3), transparent 55%);
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.6);
       padding: 8px 9px;
-      background: radial-gradient(circle at top left, rgba(59,130,246,0.38), transparent 56%);
-      border: 1px solid rgba(148,163,184,0.7);
-      position: relative;
-      overflow: hidden;
     }
 
     .stat-card:nth-child(2) {
-      background: radial-gradient(circle at top left, rgba(34,197,94,0.4), transparent 60%);
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.35), transparent 60%);
     }
 
     .stat-card:nth-child(3) {
-      background: radial-gradient(circle at top left, rgba(249,115,22,0.45), transparent 62%);
+      background: radial-gradient(circle at top left, rgba(249,115,22,0.4), transparent 65%);
     }
 
     .stat-label {
       font-size: 11px;
-      color: #d1d5db;
-      opacity: 0.9;
+      color: #e5e7eb;
     }
 
     .stat-value {
@@ -300,17 +295,17 @@
     .stat-expense { color: #fecaca; }
     .stat-balance { color: #a5f3fc; }
 
+    /* 工具栏 */
     .table-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       margin: 6px 0 6px;
       flex-wrap: wrap;
     }
 
-    .toolbar-left,
-    .toolbar-right {
+    .toolbar-left, .toolbar-right {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -321,32 +316,32 @@
       display: inline-flex;
       padding: 3px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: #020617;
+      border: 1px solid rgba(148,163,184,0.7);
     }
 
     .pill-filter button {
       border-radius: 999px;
-      border: none;
       padding: 3px 8px;
       font-size: 11px;
-      color: #9ca3af;
       background: transparent;
-      cursor: pointer;
+      color: #9ca3af;
+      border: none;
     }
 
     .pill-filter button.active {
       background: linear-gradient(135deg, #3b82f6, #22c55e);
-      color: white;
-      box-shadow: 0 6px 10px rgba(37, 99, 235, 0.6);
+      color: #fff;
+      box-shadow: 0 6px 12px rgba(37,99,235,0.7);
     }
 
+    /* 表格 */
     .table-wrapper {
       max-height: 60vh;
       border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.55);
+      border: 1px solid rgba(148,163,184,0.5);
       overflow: hidden;
-      background: rgba(15, 23, 42, 0.96);
+      background: #020617;
     }
 
     .table-wrapper.small-table {
@@ -361,7 +356,7 @@
     }
 
     thead {
-      background: linear-gradient(90deg, rgba(15,23,42,0.98), rgba(30,64,175,0.9));
+      background: linear-gradient(90deg, #020617, #1d4ed8);
       position: sticky;
       top: 0;
       z-index: 1;
@@ -369,19 +364,19 @@
 
     th, td {
       padding: 6px 8px;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      border-bottom: 1px solid #1f2937;
       text-align: left;
       vertical-align: top;
       color: #e5e7eb;
-      max-width: 220px;
+      max-width: 260px;
       word-break: break-all;
     }
 
-    tbody tr:nth-child(even) { background: rgba(15,23,42,0.9); }
-    tbody tr:nth-child(odd) { background: rgba(17,24,39,1); }
+    tbody tr:nth-child(even) { background: #020617; }
+    tbody tr:nth-child(odd) { background: #020617ee; }
 
     tbody tr:hover {
-      background: rgba(59, 130, 246, 0.25);
+      background: rgba(59,130,246,0.25);
     }
 
     .tag {
@@ -396,15 +391,15 @@
     }
 
     .tag-income {
-      background: rgba(22, 163, 74, 0.25);
+      background: rgba(22,163,74,0.25);
       color: #bbf7d0;
-      border-color: rgba(34,197,94,0.6);
+      border-color: rgba(34,197,94,0.7);
     }
 
     .tag-expense {
-      background: rgba(248, 113, 113, 0.2);
+      background: rgba(248,113,113,0.25);
       color: #fecaca;
-      border-color: rgba(239,68,68,0.8);
+      border-color: rgba(248,113,113,0.7);
     }
 
     .tag-status-out {
@@ -416,78 +411,118 @@
     .tag-status-back {
       background: rgba(45,212,191,0.25);
       color: #a5f3fc;
-      border-color: rgba(56,189,248,0.75);
+      border-color: rgba(56,189,248,0.8);
     }
 
     .amount-income { color: #bbf7d0; font-weight: 600; }
     .amount-expense { color: #fecaca; font-weight: 600; }
 
     .td-actions { white-space: nowrap; }
-    .td-actions .btn { padding: 3px 8px; font-size: 11px; }
 
-    @media (max-width: 980px) {
+    .td-actions button {
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+
+    /* 弹窗 */
+    #editModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    #editBox {
+      width: 92%;
+      max-width: 480px;
+      background: #020617;
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,0.7);
+      box-shadow:
+        0 24px 60px rgba(15,23,42,0.9),
+        0 0 0 1px rgba(30,64,175,0.7);
+      padding: 16px 16px 14px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 960px) {
       .grid { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 768px) {
-      form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 720px) {
+      form { grid-template-columns: 1fr; }
       .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 480px) {
       header h1 { font-size: 18px; }
       .stats-row { grid-template-columns: 1fr 1fr; }
-      form { grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
 <header>
-  <h1>
-    <span class="logo-dot"></span>
-    租赁控制面板
-  </h1>
-  <p>一条记录覆盖整个租赁过程，出库时新增，回库时点“回库”，自动统计每日出回台数和净收益。</p>
+  <h1><span class="logo-dot"></span>租赁管理系统（可编辑）</h1>
+  <p>出库只记一次，回库点按钮即可；支持修改记录，自动统计每日出回台数与收支情况。</p>
 </header>
 
 <div class="page">
   <div class="grid">
-    <!-- 左侧：录入表单 -->
+    <!-- 左：录入 -->
     <div class="card">
       <div class="card-title">
-        <div class="card-title-left">
-          账目录入
-          <span class="pill">出库记录</span>
-        </div>
-        <div class="card-title-right">
-          出库时记一条，回库时在列表里点“回库”
-        </div>
+        <span>新增出库记录</span>
+        <span class="badge">一次记录覆盖整个租赁过程</span>
       </div>
 
       <form id="recordForm">
         <div class="field">
-          <label for="time">出库时间</label>
-          <input type="datetime-local" id="time" name="time">
+          <label for="startTime">出库时间</label>
+          <input type="datetime-local" id="startTime">
         </div>
 
         <div class="field">
           <label for="deviceId">设备编号</label>
-          <input type="text" id="deviceId" name="deviceId" placeholder="例如：1 / 02 / A01">
+          <input type="text" id="deviceId" placeholder="如：1 / 02 / A01">
         </div>
 
         <div class="field">
           <label for="model">机型</label>
-          <input type="text" id="model" name="model" placeholder="例如：设备型号">
+          <input type="text" id="model" placeholder="设备型号">
         </div>
 
         <div class="field">
           <label for="customer">客户信息</label>
-          <input type="text" id="customer" name="customer" placeholder="姓名 / 电话 / 公司">
+          <input type="text" id="customer" placeholder="姓名 / 电话 / 公司">
         </div>
 
         <div class="field">
-          <label for="ioType">收支类型（针对金额）</label>
-          <select id="ioType" name="ioType">
+          <label for="ioType">收支类型（金额）</label>
+          <select id="ioType">
             <option value="income">收入（租金 / 押金等）</option>
             <option value="expense">支出（退款 / 成本等）</option>
           </select>
@@ -495,55 +530,49 @@
 
         <div class="field">
           <label for="amount">金额（￥）</label>
-          <input type="number" step="0.01" id="amount" name="amount" placeholder="0.00">
+          <input type="number" step="0.01" id="amount" placeholder="0.00">
         </div>
 
         <div class="field">
-          <label for="shipping">邮费（￥，默认视为支出）</label>
-          <input type="number" step="0.01" id="shipping" name="shipping" placeholder="0.00">
+          <label for="shipping">邮费（￥，视为支出）</label>
+          <input type="number" step="0.01" id="shipping" placeholder="0.00">
         </div>
 
         <div class="field">
           <label for="outNo">寄出单号</label>
-          <input type="text" id="outNo" name="outNo" placeholder="设备寄出快递单号">
+          <input type="text" id="outNo" placeholder="设备寄出快递单号">
         </div>
 
         <div class="field">
           <label for="backNo">寄回单号</label>
-          <input type="text" id="backNo" name="backNo" placeholder="客户寄回快递单号">
+          <input type="text" id="backNo" placeholder="客户寄回快递单号">
         </div>
 
         <div class="field full-row">
           <label for="backAddress">寄回地址（客户地址）</label>
-          <textarea id="backAddress" name="backAddress" placeholder="详细地址 / 备注说明"></textarea>
+          <textarea id="backAddress" placeholder="详细地址 / 备注说明"></textarea>
         </div>
 
         <div class="form-footer">
-          <button type="submit" class="btn btn-primary">＋ 新增出库记录</button>
+          <button type="submit" class="btn-primary">＋ 新增出库记录</button>
         </div>
       </form>
 
       <p class="small">
-        使用流程：<br>
-        · 设备出库：在上面填写信息 → 点“新增出库记录”。<br>
-        · 设备回库：在下面明细表中找到对应记录 → 点“回库”按钮即可（不用再新建一条）。<br>
-        · 系统会根据“出库时间 / 回库时间”自动得出每天出去了几台、回来了几台。
+        使用说明：<br>
+        · <b>出库</b>：在上面填写后点击「新增出库记录」。<br>
+        · <b>回库</b>：在下方明细表中找到对应记录，点击「回库」，系统会给这条记录自动加上回库时间；之后可以在「编辑」里修改这个时间。<br>
+        · 每条记录都有唯一的出库时间和（可选）回库时间，系统根据这两个时间来计算每日出/回台数。
       </p>
     </div>
 
-    <!-- 右侧：统计信息 & 每日出入 -->
+    <!-- 右：统计 -->
     <div class="card">
       <div class="card-title">
-        <div class="card-title-left">
-          汇总统计
-          <span class="pill">金额 + 设备</span>
-        </div>
-        <div class="card-title-right">
-          数据仅保存在当前浏览器
-        </div>
+        <span>汇总统计</span>
+        <span class="badge">金额 + 设备出入</span>
       </div>
 
-      <!-- 金额统计 -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">记录数量</div>
@@ -561,7 +590,7 @@
 
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-label">净收益（收入 - 支出）</div>
+          <div class="stat-label">净收益</div>
           <div class="stat-value stat-balance" id="statBalance">￥0.00</div>
         </div>
         <div class="stat-card">
@@ -569,7 +598,7 @@
           <div class="stat-value" id="statShipping">￥0.00</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">最近一笔时间</div>
+          <div class="stat-label">最近操作时间</div>
           <div class="stat-value" id="statLastTime">—</div>
         </div>
       </div>
@@ -577,24 +606,21 @@
       <div class="table-toolbar">
         <div class="toolbar-left">
           <div class="pill-filter" id="filterGroup">
-            <button type="button" data-filter="all" class="active">全部记录</button>
+            <button type="button" data-filter="all" class="active">全部</button>
             <button type="button" data-filter="income">仅收入</button>
             <button type="button" data-filter="expense">仅支出</button>
           </div>
         </div>
         <div class="toolbar-right">
-          <button id="exportCsvBtn" class="btn btn-secondary">导出 CSV</button>
-          <button id="clearAllBtn" class="btn btn-danger">清空全部</button>
+          <button id="exportCsvBtn" class="btn-secondary">导出 CSV</button>
+          <button id="clearAllBtn" class="btn-danger">清空全部</button>
         </div>
       </div>
 
-      <!-- 每日设备出入统计 -->
-      <div style="margin-top:6px;">
+      <div style="margin-top: 6px;">
         <div class="card-title" style="margin-bottom:4px;">
-          <div class="card-title-left" style="font-size:13px;">
-            每日设备出 / 回统计
-            <span class="pill">按日期汇总</span>
-          </div>
+          <span>每日设备出 / 回统计</span>
+          <span class="badge">按日期汇总</span>
         </div>
         <div class="table-wrapper small-table">
           <table>
@@ -607,31 +633,26 @@
               <th>累计在外</th>
             </tr>
             </thead>
-            <tbody id="dayStatsBody">
-            </tbody>
+            <tbody id="dayStatsBody"></tbody>
           </table>
         </div>
       </div>
 
       <p class="small">
-        说明：<br>
-        · “出去台数”来自该日的出库时间；“回来台数”来自该日的回库时间。<br>
-        · “净变化” = 出去台数 - 回来台数；“累计在外” = 从第一天累计至今还在外面的数量。
+        · 出去台数：该日期所有记录的出库时间落在这一天的数量。<br>
+        · 回来台数：该日期所有记录的回库时间落在这一天的数量。<br>
+        · 累计在外 = 从第一天开始的净变化累积（不需要预设总设备数）。
       </p>
     </div>
   </div>
 
-  <!-- 明细表格 -->
+  <!-- 明细表 -->
   <div class="card">
     <div class="card-title">
-      <div class="card-title-left">
-        记录明细
-        <span class="pill" id="recordSummary">共 0 条</span>
-      </div>
-      <div class="card-title-right">
-        未回库记录可在此直接点“回库”
-      </div>
+      <span>记录明细</span>
+      <span class="badge" id="recordSummary">共 0 条</span>
     </div>
+
     <div class="table-wrapper">
       <table>
         <thead>
@@ -651,18 +672,96 @@
           <th>操作</th>
         </tr>
         </thead>
-        <tbody id="recordTableBody">
-        </tbody>
+        <tbody id="recordTableBody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<script>
-  const STORAGE_KEY = 'rental_single_record_v1';
+<!-- 编辑弹窗 -->
+<div id="editModal">
+  <div id="editBox">
+    <div class="modal-title">
+      <span>编辑记录</span>
+      <span style="font-size:11px;color:#9ca3af;" id="editIdLabel"></span>
+    </div>
+    <div class="modal-body">
+      <form id="editForm">
+        <div class="field">
+          <label for="editStartTime">出库时间</label>
+          <input type="datetime-local" id="editStartTime">
+        </div>
 
+        <div class="field">
+          <label for="editEndTime">回库时间（可空）</label>
+          <input type="datetime-local" id="editEndTime">
+        </div>
+
+        <div class="field">
+          <label for="editDeviceId">设备编号</label>
+          <input type="text" id="editDeviceId">
+        </div>
+
+        <div class="field">
+          <label for="editModel">机型</label>
+          <input type="text" id="editModel">
+        </div>
+
+        <div class="field">
+          <label for="editCustomer">客户信息</label>
+          <input type="text" id="editCustomer">
+        </div>
+
+        <div class="field">
+          <label for="editIoType">收支类型</label>
+          <select id="editIoType">
+            <option value="income">收入</option>
+            <option value="expense">支出</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="editAmount">金额（￥）</label>
+          <input type="number" step="0.01" id="editAmount">
+        </div>
+
+        <div class="field">
+          <label for="editShipping">邮费（￥）</label>
+          <input type="number" step="0.01" id="editShipping">
+        </div>
+
+        <div class="field">
+          <label for="editOutNo">寄出单号</label>
+          <input type="text" id="editOutNo">
+        </div>
+
+        <div class="field">
+          <label for="editBackNo">寄回单号</label>
+          <input type="text" id="editBackNo">
+        </div>
+
+        <div class="field">
+          <label for="editBackAddress">寄回地址</label>
+          <textarea id="editBackAddress"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="cancelEditBtn">取消</button>
+      <button class="btn-primary" id="saveEditBtn">保存修改</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'rental_editable_v1';
   let records = [];
   let currentFilter = 'all'; // all | income | expense
+  let editingId = null;
+
+  function uuid() {
+    return 'id-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
 
   function loadRecords() {
     try {
@@ -692,11 +791,25 @@
     );
   }
 
+  function toInputDateTime(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    const pad = n => n.toString().padStart(2, '0');
+    return (
+      d.getFullYear() + '-' +
+      pad(d.getMonth() + 1) + '-' +
+      pad(d.getDate()) + 'T' +
+      pad(d.getHours()) + ':' +
+      pad(d.getMinutes())
+    );
+  }
+
   function getDateKey(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr.slice(0, 10);
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+    return d.toISOString().slice(0, 10);
   }
 
   function getFilteredRecords() {
@@ -720,9 +833,17 @@
       const timeTd = document.createElement('td');
       const outText = formatDate(r.startTime);
       const backText = r.endTime ? formatDate(r.endTime) : '';
-      timeTd.innerHTML = outText
-        ? `<div>出库：${outText}</div>${backText ? `<div>回库：${backText}</div>` : ''}`
-        : '';
+      timeTd.innerHTML = '';
+      if (outText) {
+        const div1 = document.createElement('div');
+        div1.textContent = '出库：' + outText;
+        timeTd.appendChild(div1);
+      }
+      if (backText) {
+        const div2 = document.createElement('div');
+        div2.textContent = '回库：' + backText;
+        timeTd.appendChild(div2);
+      }
       tr.appendChild(timeTd);
 
       const deviceTd = document.createElement('td');
@@ -730,15 +851,10 @@
       tr.appendChild(deviceTd);
 
       const statusTd = document.createElement('td');
-      const statusTag = document.createElement('span');
-      if (r.endTime) {
-        statusTag.className = 'tag tag-status-back';
-        statusTag.textContent = '已回库';
-      } else {
-        statusTag.className = 'tag tag-status-out';
-        statusTag.textContent = '在外';
-      }
-      statusTd.appendChild(statusTag);
+      const st = document.createElement('span');
+      st.className = 'tag ' + (r.endTime ? 'tag-status-back' : 'tag-status-out');
+      st.textContent = r.endTime ? '已回库' : '在外';
+      statusTd.appendChild(st);
       tr.appendChild(statusTd);
 
       const modelTd = document.createElement('td');
@@ -788,15 +904,16 @@
       const actionTd = document.createElement('td');
       actionTd.className = 'td-actions';
 
-      const realIndex = records.indexOf(r);
+      const realIndex = records.findIndex(x => x.id === r.id);
 
       const returnBtn = document.createElement('button');
-      returnBtn.className = 'btn btn-secondary';
       if (r.endTime) {
         returnBtn.textContent = '已回库';
+        returnBtn.className = 'btn-secondary';
         returnBtn.disabled = true;
       } else {
         returnBtn.textContent = '回库';
+        returnBtn.className = 'btn-return';
         returnBtn.onclick = () => {
           if (!confirm('确认将本条记录标记为“已回库”？')) return;
           r.endTime = new Date().toISOString();
@@ -807,18 +924,24 @@
       }
       actionTd.appendChild(returnBtn);
 
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '编辑';
+      editBtn.className = 'btn-edit';
+      editBtn.style.marginLeft = '4px';
+      editBtn.onclick = () => openEditModal(r.id);
+      actionTd.appendChild(editBtn);
+
       const delBtn = document.createElement('button');
       delBtn.textContent = '删除';
-      delBtn.className = 'btn btn-ghost';
+      delBtn.className = 'btn-ghost';
       delBtn.style.marginLeft = '4px';
       delBtn.onclick = () => {
-        if (confirm('确定删除这条记录吗？')) {
-          if (realIndex > -1) {
-            records.splice(realIndex, 1);
-            saveRecords();
-            renderTable();
-            updateStats();
-          }
+        if (!confirm('确定删除这条记录吗？')) return;
+        if (realIndex > -1) {
+          records.splice(realIndex, 1);
+          saveRecords();
+          renderTable();
+          updateStats();
         }
       };
       actionTd.appendChild(delBtn);
@@ -836,17 +959,17 @@
     const map = {};
     records.forEach(r => {
       if (r.startTime) {
-        const keyOut = getDateKey(r.startTime);
-        if (keyOut) {
-          if (!map[keyOut]) map[keyOut] = { out: 0, back: 0 };
-          map[keyOut].out += 1;
+        const k = getDateKey(r.startTime);
+        if (k) {
+          if (!map[k]) map[k] = { out: 0, back: 0 };
+          map[k].out += 1;
         }
       }
       if (r.endTime) {
-        const keyBack = getDateKey(r.endTime);
-        if (keyBack) {
-          if (!map[keyBack]) map[keyBack] = { out: 0, back: 0 };
-          map[keyBack].back += 1;
+        const k2 = getDateKey(r.endTime);
+        if (k2) {
+          if (!map[k2]) map[k2] = { out: 0, back: 0 };
+          map[k2].back += 1;
         }
       }
     });
@@ -856,11 +979,10 @@
   function renderDayStats() {
     const tbody = document.getElementById('dayStatsBody');
     tbody.innerHTML = '';
-
     const map = computeDayStats();
     const dates = Object.keys(map).sort();
-
     let running = 0;
+
     if (dates.length === 0) {
       const tr = document.createElement('tr');
       const td = document.createElement('td');
@@ -894,9 +1016,9 @@
       deltaTd.textContent = (delta >= 0 ? '+' : '') + delta;
       tr.appendChild(deltaTd);
 
-      const runningTd = document.createElement('td');
-      runningTd.textContent = running;
-      tr.appendChild(runningTd);
+      const runTd = document.createElement('td');
+      runTd.textContent = running;
+      tr.appendChild(runTd);
 
       tbody.appendChild(tr);
     });
@@ -917,9 +1039,7 @@
       } else {
         totalExpenseAmount += amount;
       }
-      if (!isNaN(shipping)) {
-        totalShipping += shipping;
-      }
+      if (!isNaN(shipping)) totalShipping += shipping;
     });
 
     const totalExpense = totalExpenseAmount + totalShipping;
@@ -932,12 +1052,12 @@
     document.getElementById('statShipping').textContent = '￥' + totalShipping.toFixed(2);
 
     if (records.length > 0) {
-      const latestTimes = records
+      const times = records
         .map(r => r.endTime || r.startTime)
         .filter(Boolean)
         .sort((a, b) => new Date(b) - new Date(a));
       document.getElementById('statLastTime').textContent =
-        latestTimes.length ? formatDate(latestTimes[0]) : '—';
+        times.length ? formatDate(times[0]) : '—';
     } else {
       document.getElementById('statLastTime').textContent = '—';
     }
@@ -947,22 +1067,22 @@
 
   function handleFormSubmit(e) {
     e.preventDefault();
-    const form = e.target;
 
-    const startTime = form.time.value;
-    const deviceId = form.deviceId.value.trim();
-    const model = form.model.value.trim();
-    const customer = form.customer.value.trim();
-    const ioType = form.ioType.value || 'income';
-    const amount = parseFloat(form.amount.value || '0');
-    const shipping = parseFloat(form.shipping.value || '0');
-    const outNo = form.outNo.value.trim();
-    const backAddress = form.backAddress.value.trim();
-    const backNo = form.backNo.value.trim();
+    const startTime = document.getElementById('startTime').value;
+    const deviceId = document.getElementById('deviceId').value.trim();
+    const model = document.getElementById('model').value.trim();
+    const customer = document.getElementById('customer').value.trim();
+    const ioType = document.getElementById('ioType').value;
+    const amount = parseFloat(document.getElementById('amount').value || '0');
+    const shipping = parseFloat(document.getElementById('shipping').value || '0');
+    const outNo = document.getElementById('outNo').value.trim();
+    const backAddress = document.getElementById('backAddress').value.trim();
+    const backNo = document.getElementById('backNo').value.trim();
 
-    const record = {
-      startTime,
-      endTime: null, // 回库时间，初始为 null，点“回库”按钮后填入
+    const rec = {
+      id: uuid(),
+      startTime: startTime || new Date().toISOString(),
+      endTime: null,
       deviceId,
       model,
       customer,
@@ -974,14 +1094,14 @@
       backNo
     };
 
-    records.push(record);
+    records.push(rec);
     saveRecords();
     renderTable();
     updateStats();
 
-    form.reset();
+    document.getElementById('recordForm').reset();
     document.getElementById('ioType').value = 'income';
-    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('startTime').value = new Date().toISOString().slice(0, 16);
   }
 
   function exportToCsv() {
@@ -1020,16 +1140,16 @@
       r.backNo || ''
     ]);
 
-    const csvArray = [header, ...rows]
-      .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','))
+    const csv = [header, ...rows]
+      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
       .join('\r\n');
 
-    const blob = new Blob([csvArray], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     const nowStr = new Date().toISOString().slice(0, 10);
-    a.download = `租赁账目导出_${nowStr}.csv`;
+    a.download = `租赁记录导出_${nowStr}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1037,7 +1157,7 @@
   }
 
   function clearAll() {
-    if (!confirm('这将删除当前浏览器中所有记录，确定要清空吗？')) return;
+    if (!confirm('这将清空当前浏览器中的所有记录，确定吗？')) return;
     records = [];
     saveRecords();
     renderTable();
@@ -1046,31 +1166,97 @@
 
   function bindFilterButtons() {
     const group = document.getElementById('filterGroup');
-    group.addEventListener('click', (e) => {
+    group.addEventListener('click', e => {
       if (e.target.tagName.toLowerCase() !== 'button') return;
       const type = e.target.getAttribute('data-filter');
       if (!type) return;
       currentFilter = type;
-      [...group.querySelectorAll('button')].forEach(btn => {
-        btn.classList.toggle('active', btn === e.target);
+      Array.from(group.querySelectorAll('button')).forEach(b => {
+        b.classList.toggle('active', b === e.target);
       });
       renderTable();
     });
+  }
+
+  function openEditModal(id) {
+    const rec = records.find(r => r.id === id);
+    if (!rec) return;
+    editingId = id;
+
+    document.getElementById('editIdLabel').textContent = id;
+
+    document.getElementById('editStartTime').value = toInputDateTime(rec.startTime);
+    document.getElementById('editEndTime').value = toInputDateTime(rec.endTime);
+    document.getElementById('editDeviceId').value = rec.deviceId || '';
+    document.getElementById('editModel').value = rec.model || '';
+    document.getElementById('editCustomer').value = rec.customer || '';
+    document.getElementById('editIoType').value = rec.ioType || 'income';
+    document.getElementById('editAmount').value =
+      rec.amount != null ? rec.amount : '';
+    document.getElementById('editShipping').value =
+      rec.shipping != null ? rec.shipping : '';
+    document.getElementById('editOutNo').value = rec.outNo || '';
+    document.getElementById('editBackNo').value = rec.backNo || '';
+    document.getElementById('editBackAddress').value = rec.backAddress || '';
+
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    editingId = null;
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  function saveEdit() {
+    if (!editingId) return;
+    const rec = records.find(r => r.id === editingId);
+    if (!rec) return;
+
+    const startVal = document.getElementById('editStartTime').value;
+    const endVal = document.getElementById('editEndTime').value;
+
+    rec.startTime = startVal ? new Date(startVal).toISOString() : rec.startTime;
+    rec.endTime = endVal ? new Date(endVal).toISOString() : null;
+    rec.deviceId = document.getElementById('editDeviceId').value.trim();
+    rec.model = document.getElementById('editModel').value.trim();
+    rec.customer = document.getElementById('editCustomer').value.trim();
+    rec.ioType = document.getElementById('editIoType').value;
+    const amt = parseFloat(document.getElementById('editAmount').value || '0');
+    const shp = parseFloat(document.getElementById('editShipping').value || '0');
+    rec.amount = isNaN(amt) ? 0 : amt;
+    rec.shipping = isNaN(shp) ? 0 : shp;
+    rec.outNo = document.getElementById('editOutNo').value.trim();
+    rec.backNo = document.getElementById('editBackNo').value.trim();
+    rec.backAddress = document.getElementById('editBackAddress').value.trim();
+
+    saveRecords();
+    renderTable();
+    updateStats();
+    closeEditModal();
   }
 
   function init() {
     loadRecords();
     renderTable();
     updateStats();
-
-    const form = document.getElementById('recordForm');
-    form.addEventListener('submit', handleFormSubmit);
-
-    document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
-    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
     bindFilterButtons();
 
-    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+    document.getElementById('recordForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+
+    document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+    document.getElementById('saveEditBtn').addEventListener('click', e => {
+      e.preventDefault();
+      saveEdit();
+    });
+    document.getElementById('editModal').addEventListener('click', e => {
+      if (e.target.id === 'editModal') {
+        closeEditModal();
+      }
+    });
+
+    document.getElementById('startTime').value = new Date().toISOString().slice(0, 16);
   }
 
   document.addEventListener('DOMContentLoaded', init);
