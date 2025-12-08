@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>租赁项目账目统计</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #dbeafe;
+      --danger: #ef4444;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --radius-lg: 14px;
+      --radius-md: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #e0f2fe 0, #f9fafb 40%, #f3f4f6 100%);
+      color: var(--text-main);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb, #4f46e5);
+      color: #fff;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.35);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 20px auto 32px;
+      padding: 0 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px 16px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title span.badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: #1d4ed8;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px 12px;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--text-sub);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    textarea {
+      border-radius: 10px;
+      min-height: 44px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #2563eb;
+      background: #fff;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    .btn {
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 7px 14px;
+      border: none;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform .08s ease, box-shadow .08s ease, opacity .2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: var(--text-main);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+    }
+
+    .form-footer {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .form-footer .btn {
+      min-width: 112px;
+      justify-content: center;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .stat-card {
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .stat-income {
+      color: #16a34a;
+    }
+
+    .stat-expense {
+      color: #dc2626;
+    }
+
+    .stat-balance {
+      color: #0f766e;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 8px;
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-filter {
+      display: inline-flex;
+      gap: 4px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      padding: 3px;
+    }
+
+    .pill-filter button {
+      border-radius: 999px;
+      border: none;
+      font-size: 11px;
+      padding: 3px 8px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-sub);
+    }
+
+    .pill-filter button.active {
+      background: #fff;
+      color: var(--primary);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.12);
+    }
+
+    .table-wrapper {
+      max-height: 60vh;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #f9fafb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #f3f4f6;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      box-shadow: 0 2px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+      max-width: 220px;
+      word-break: break-all;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    tbody tr:hover {
+      background: #e5f0ff;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid transparent;
+      min-width: 42px;
+    }
+
+    .tag-income {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .tag-expense {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .tag-chip {
+      padding: 1px 6px;
+      font-size: 11px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: var(--text-sub);
+    }
+
+    .td-actions {
+      white-space: nowrap;
+    }
+
+    .td-actions .btn {
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+
+    .amount-income {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .amount-expense {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>租赁项目 · 账目 & 进出统计</h1>
+  <p>记录每一笔租赁相关流水，自动统计收入、支出与净收益（本页数据保存在浏览器本地）。</p>
+</header>
+
+<div class="page">
+  <div class="grid">
+    <!-- 左侧：录入表单 -->
+    <div class="card">
+      <div class="card-title">
+        账目录入
+        <span class="badge">租赁流水</span>
+      </div>
+      <form id="recordForm">
+        <div class="field">
+          <label for="time">时间</label>
+          <input type="datetime-local" id="time" name="time">
+        </div>
+
+        <div class="field">
+          <label for="model">机型</label>
+          <input type="text" id="model" name="model" placeholder="例如：某设备型号">
+        </div>
+
+        <div class="field">
+          <label for="customer">客户信息</label>
+          <input type="text" id="customer" name="customer" placeholder="姓名 / 电话 / 公司">
+        </div>
+
+        <div class="field">
+          <label for="ioType">收支类型（针对金额）</label>
+          <select id="ioType" name="ioType">
+            <option value="income">收入（客户付款 / 押金等）</option>
+            <option value="expense">支出（退款 / 成本等）</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="amount">金额（￥）</label>
+          <input type="number" step="0.01" id="amount" name="amount" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label for="shipping">邮费（￥，默认视为支出）</label>
+          <input type="number" step="0.01" id="shipping" name="shipping" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label for="outNo">寄出单号</label>
+          <input type="text" id="outNo" name="outNo" placeholder="设备寄出快递单号">
+        </div>
+
+        <div class="field">
+          <label for="backNo">寄回单号</label>
+          <input type="text" id="backNo" name="backNo" placeholder="客户寄回快递单号">
+        </div>
+
+        <div class="field full-row">
+          <label for="backAddress">寄回地址（客户地址）</label>
+          <textarea id="backAddress" name="backAddress" placeholder="详细地址 / 备注说明"></textarea>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary">＋ 新增记录</button>
+        </div>
+      </form>
+
+      <p class="small">
+        小提示：<br>
+        · “金额”通过“收支类型”区分收入 / 支出，例如租金收入、押金、退款等。<br>
+        · 邮费统一视为支出，自动计入总支出和净收益计算。
+      </p>
+    </div>
+
+    <!-- 右侧：统计信息 & 操作 -->
+    <div class="card">
+      <div class="card-title">
+        收入 / 支出统计
+        <span class="badge">自动汇总</span>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">记录数量</div>
+          <div class="stat-value" id="statCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">总收入（金额）</div>
+          <div class="stat-value stat-income" id="statIncome">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">总支出（金额＋邮费）</div>
+          <div class="stat-value stat-expense" id="statExpense">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">净收益（收入 - 支出）</div>
+          <div class="stat-value stat-balance" id="statBalance">￥0.00</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">邮费合计</div>
+          <div class="stat-value" id="statShipping">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">收入笔数</div>
+          <div class="stat-value" id="statIncomeCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">支出笔数</div>
+          <div class="stat-value" id="statExpenseCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">最近一笔时间</div>
+          <div class="stat-value" id="statLastTime">—</div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:10px 0 8px;">
+
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="pill-filter" id="filterGroup">
+            <button type="button" data-filter="all" class="active">全部</button>
+            <button type="button" data-filter="income">仅收入</button>
+            <button type="button" data-filter="expense">仅支出</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button id="exportCsvBtn" class="btn btn-secondary">导出 CSV</button>
+          <button id="clearAllBtn" class="btn btn-danger">清空全部</button>
+        </div>
+      </div>
+
+      <p class="small">
+        数据仅保存在当前浏览器（localStorage），更换浏览器或清理浏览数据会丢失记录。建议定期用“导出 CSV”备份到 Excel。
+      </p>
+    </div>
+  </div>
+
+  <!-- 表格区域 -->
+  <div class="card">
+    <div class="card-title">
+      记录明细
+      <span class="badge" id="recordSummary">共 0 条</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>序列</th>
+          <th>时间</th>
+          <th>机型</th>
+          <th>客户信息</th>
+          <th>收支类型</th>
+          <th>金额</th>
+          <th>邮费</th>
+          <th>寄出单号</th>
+          <th>寄回地址</th>
+          <th>寄回单号</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="recordTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'account_records_v2';
+  let records = [];
+  let currentFilter = 'all'; // all | income | expense
+
+  function loadRecords() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      records = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.error('加载本地数据失败', e);
+      records = [];
+    }
+  }
+
+  function saveRecords() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const pad = n => n.toString().padStart(2, '0');
+    return (
+      d.getFullYear() + '-' +
+      pad(d.getMonth() + 1) + '-' +
+      pad(d.getDate()) + ' ' +
+      pad(d.getHours()) + ':' +
+      pad(d.getMinutes())
+    );
+  }
+
+  function getFilteredRecords() {
+    if (currentFilter === 'all') return records;
+    return records.filter(r => r.ioType === currentFilter);
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('recordTableBody');
+    tbody.innerHTML = '';
+
+    const list = getFilteredRecords();
+    list.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+
+      const seqTd = document.createElement('td');
+      seqTd.textContent = idx + 1;
+      tr.appendChild(seqTd);
+
+      const timeTd = document.createElement('td');
+      timeTd.textContent = formatDate(r.time);
+      tr.appendChild(timeTd);
+
+      const modelTd = document.createElement('td');
+      modelTd.textContent = r.model || '';
+      tr.appendChild(modelTd);
+
+      const customerTd = document.createElement('td');
+      customerTd.textContent = r.customer || '';
+      tr.appendChild(customerTd);
+
+      const ioTypeTd = document.createElement('td');
+      const tag = document.createElement('span');
+      tag.className = 'tag ' + (r.ioType === 'income' ? 'tag-income' : 'tag-expense');
+      tag.textContent = r.ioType === 'income' ? '收入' : '支出';
+      ioT
