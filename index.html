@@ -628,4 +628,232 @@
       const tag = document.createElement('span');
       tag.className = 'tag ' + (r.ioType === 'income' ? 'tag-income' : 'tag-expense');
       tag.textContent = r.ioType === 'income' ? '收入' : '支出';
-      ioT
+      ioTypeTd.appendChild(tag);
+      tr.appendChild(ioTypeTd);
+
+      const amountTd = document.createElement('td');
+      if (r.amount != null) {
+        amountTd.textContent = r.amount.toFixed(2);
+        amountTd.className = r.ioType === 'income' ? 'amount-income' : 'amount-expense';
+      } else {
+        amountTd.textContent = '';
+      }
+      tr.appendChild(amountTd);
+
+      const shippingTd = document.createElement('td');
+      if (r.shipping != null && !isNaN(r.shipping)) {
+        shippingTd.textContent = r.shipping.toFixed(2);
+      } else {
+        shippingTd.textContent = '';
+      }
+      tr.appendChild(shippingTd);
+
+      const outNoTd = document.createElement('td');
+      outNoTd.textContent = r.outNo || '';
+      tr.appendChild(outNoTd);
+
+      const backAddrTd = document.createElement('td');
+      backAddrTd.textContent = r.backAddress || '';
+      tr.appendChild(backAddrTd);
+
+      const backNoTd = document.createElement('td');
+      backNoTd.textContent = r.backNo || '';
+      tr.appendChild(backNoTd);
+
+      const actionTd = document.createElement('td');
+      actionTd.className = 'td-actions';
+
+      const realIndex = records.indexOf(r);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '删除';
+      delBtn.className = 'btn btn-ghost';
+      delBtn.onclick = () => {
+        if (confirm('确定删除这条记录吗？')) {
+          if (realIndex > -1) {
+            records.splice(realIndex, 1);
+            saveRecords();
+            renderTable();
+            updateStats();
+          }
+        }
+      };
+      actionTd.appendChild(delBtn);
+      tr.appendChild(actionTd);
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('recordSummary').textContent = `共 ${records.length} 条（当前显示：${list.length} 条）`;
+  }
+
+  function updateStats() {
+    const totalCount = records.length;
+    let totalIncome = 0;
+    let totalExpenseAmount = 0;
+    let totalShipping = 0;
+    let incomeCount = 0;
+    let expenseCount = 0;
+
+    records.forEach(r => {
+      const amount = r.amount || 0;
+      const shipping = r.shipping || 0;
+      if (r.ioType === 'income') {
+        totalIncome += amount;
+        incomeCount += 1;
+      } else {
+        totalExpenseAmount += amount;
+        expenseCount += 1;
+      }
+      if (!isNaN(shipping)) {
+        totalShipping += shipping;
+      }
+    });
+
+    const totalExpense = totalExpenseAmount + totalShipping;
+    const balance = totalIncome - totalExpense;
+
+    document.getElementById('statCount').textContent = totalCount;
+    document.getElementById('statIncome').textContent = '￥' + totalIncome.toFixed(2);
+    document.getElementById('statExpense').textContent = '￥' + totalExpense.toFixed(2);
+    document.getElementById('statBalance').textContent = '￥' + balance.toFixed(2);
+    document.getElementById('statShipping').textContent = '￥' + totalShipping.toFixed(2);
+    document.getElementById('statIncomeCount').textContent = incomeCount;
+    document.getElementById('statExpenseCount').textContent = expenseCount;
+
+    if (records.length > 0) {
+      const sorted = [...records].sort((a, b) => new Date(b.time) - new Date(a.time));
+      document.getElementById('statLastTime').textContent = formatDate(sorted[0].time);
+    } else {
+      document.getElementById('statLastTime').textContent = '—';
+    }
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    const time = form.time.value;
+    const model = form.model.value.trim();
+    const customer = form.customer.value.trim();
+    const ioType = form.ioType.value || 'income';
+    const amount = parseFloat(form.amount.value || '0');
+    const shipping = parseFloat(form.shipping.value || '0');
+    const outNo = form.outNo.value.trim();
+    const backAddress = form.backAddress.value.trim();
+    const backNo = form.backNo.value.trim();
+
+    const record = {
+      time,
+      model,
+      customer,
+      ioType,
+      amount: isNaN(amount) ? 0 : amount,
+      shipping: isNaN(shipping) ? 0 : shipping,
+      outNo,
+      backAddress,
+      backNo
+    };
+
+    records.push(record);
+    saveRecords();
+    renderTable();
+    updateStats();
+
+    form.reset();
+    document.getElementById('ioType').value = 'income';
+    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+  }
+
+  function exportToCsv() {
+    if (records.length === 0) {
+      alert('没有可导出的数据');
+      return;
+    }
+
+    const header = [
+      '序列',
+      '时间',
+      '机型',
+      '客户信息',
+      '收支类型',
+      '金额(￥)',
+      '邮费(￥)',
+      '寄出单号',
+      '寄回地址',
+      '寄回单号'
+    ];
+
+    const rows = records.map((r, idx) => [
+      idx + 1,
+      formatDate(r.time),
+      r.model || '',
+      r.customer || '',
+      r.ioType === 'income' ? '收入' : '支出',
+      (r.amount || 0).toFixed(2),
+      (r.shipping || 0).toFixed(2),
+      r.outNo || '',
+      (r.backAddress || '').replace(/\n/g, ' '),
+      r.backNo || ''
+    ]);
+
+    const csvArray = [header, ...rows]
+      .map(row => row.map(value => {
+        const v = String(value).replace(/"/g, '""');
+        return `"${v}"`;
+      }).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csvArray], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nowStr = new Date().toISOString().slice(0, 10);
+    a.download = `租赁账目导出_${nowStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAll() {
+    if (!confirm('这将删除当前浏览器中所有记录，确定要清空吗？')) return;
+    records = [];
+    saveRecords();
+    renderTable();
+    updateStats();
+  }
+
+  function bindFilterButtons() {
+    const group = document.getElementById('filterGroup');
+    group.addEventListener('click', (e) => {
+      if (e.target.tagName.toLowerCase() !== 'button') return;
+      const type = e.target.getAttribute('data-filter');
+      if (!type) return;
+      currentFilter = type;
+      [...group.querySelectorAll('button')].forEach(btn => {
+        btn.classList.toggle('active', btn === e.target);
+      });
+      renderTable();
+    });
+  }
+
+  function init() {
+    loadRecords();
+    renderTable();
+    updateStats();
+
+    const form = document.getElementById('recordForm');
+    form.addEventListener('submit', handleFormSubmit);
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+    bindFilterButtons();
+
+    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
