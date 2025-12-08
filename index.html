@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>租赁项目账目 & 设备统计（单条记录版）</title>
+  <title>租赁项目账目 & 设备统计</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
@@ -207,7 +207,873 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      white-space: nowrap
+      white-space: nowrap;
+      transition: transform .08s, box-shadow .08s, background .15s, opacity .2s;
+    }
 
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a3f5);
+      color: white;
+      box-shadow: 0 10px 18px rgba(34, 197, 94, 0.5);
+    }
 
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
 
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      box-shadow: 0 8px 16px rgba(248, 113, 113, 0.55);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .small code {
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 11px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card {
+      border-radius: 13px;
+      padding: 8px 9px;
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.38), transparent 56%);
+      border: 1px solid rgba(148,163,184,0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:nth-child(2) {
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.4), transparent 60%);
+    }
+
+    .stat-card:nth-child(3) {
+      background: radial-gradient(circle at top left, rgba(249,115,22,0.45), transparent 62%);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #d1d5db;
+      opacity: 0.9;
+    }
+
+    .stat-value {
+      margin-top: 3px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .stat-income { color: #bbf7d0; }
+    .stat-expense { color: #fecaca; }
+    .stat-balance { color: #a5f3fc; }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 6px 0 6px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-filter {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.8);
+    }
+
+    .pill-filter button {
+      border-radius: 999px;
+      border: none;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: #9ca3af;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .pill-filter button.active {
+      background: linear-gradient(135deg, #3b82f6, #22c55e);
+      color: white;
+      box-shadow: 0 6px 10px rgba(37, 99, 235, 0.6);
+    }
+
+    .table-wrapper {
+      max-height: 60vh;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .table-wrapper.small-table {
+      max-height: 260px;
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: linear-gradient(90deg, rgba(15,23,42,0.98), rgba(30,64,175,0.9));
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      text-align: left;
+      vertical-align: top;
+      color: #e5e7eb;
+      max-width: 220px;
+      word-break: break-all;
+    }
+
+    tbody tr:nth-child(even) { background: rgba(15,23,42,0.9); }
+    tbody tr:nth-child(odd) { background: rgba(17,24,39,1); }
+
+    tbody tr:hover {
+      background: rgba(59, 130, 246, 0.25);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid transparent;
+      min-width: 44px;
+    }
+
+    .tag-income {
+      background: rgba(22, 163, 74, 0.25);
+      color: #bbf7d0;
+      border-color: rgba(34,197,94,0.6);
+    }
+
+    .tag-expense {
+      background: rgba(248, 113, 113, 0.2);
+      color: #fecaca;
+      border-color: rgba(239,68,68,0.8);
+    }
+
+    .tag-status-out {
+      background: rgba(59,130,246,0.25);
+      color: #bfdbfe;
+      border-color: rgba(59,130,246,0.8);
+    }
+
+    .tag-status-back {
+      background: rgba(45,212,191,0.25);
+      color: #a5f3fc;
+      border-color: rgba(56,189,248,0.75);
+    }
+
+    .amount-income { color: #bbf7d0; font-weight: 600; }
+    .amount-expense { color: #fecaca; font-weight: 600; }
+
+    .td-actions { white-space: nowrap; }
+    .td-actions .btn { padding: 3px 8px; font-size: 11px; }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 520px) {
+      header h1 { font-size: 18px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    <span class="logo-dot"></span>
+    租赁控制面板
+  </h1>
+  <p>一条记录覆盖整个租赁过程，出库时新增，回库时点“回库”，自动统计每日出回台数和净收益。</p>
+</header>
+
+<div class="page">
+  <div class="grid">
+    <!-- 左侧：录入表单 -->
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          账目录入
+          <span class="pill">出库记录</span>
+        </div>
+        <div class="card-title-right">
+          出库时记一条，回库时在列表里点“回库”
+        </div>
+      </div>
+
+      <form id="recordForm">
+        <div class="field">
+          <label for="time">出库时间</label>
+          <input type="datetime-local" id="time" name="time">
+        </div>
+
+        <div class="field">
+          <label for="deviceId">设备编号</label>
+          <input type="text" id="deviceId" name="deviceId" placeholder="例如：1 / 02 / A01">
+        </div>
+
+        <div class="field">
+          <label for="model">机型</label>
+          <input type="text" id="model" name="model" placeholder="例如：设备型号">
+        </div>
+
+        <div class="field">
+          <label for="customer">客户信息</label>
+          <input type="text" id="customer" name="customer" placeholder="姓名 / 电话 / 公司">
+        </div>
+
+        <div class="field">
+          <label for="ioType">收支类型（针对金额）</label>
+          <select id="ioType" name="ioType">
+            <option value="income">收入（租金 / 押金等）</option>
+            <option value="expense">支出（退款 / 成本等）</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="amount">金额（￥）</label>
+          <input type="number" step="0.01" id="amount" name="amount" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label for="shipping">邮费（￥，默认视为支出）</label>
+          <input type="number" step="0.01" id="shipping" name="shipping" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label for="outNo">寄出单号</label>
+          <input type="text" id="outNo" name="outNo" placeholder="设备寄出快递单号">
+        </div>
+
+        <div class="field">
+          <label for="backNo">寄回单号</label>
+          <input type="text" id="backNo" name="backNo" placeholder="客户寄回快递单号">
+        </div>
+
+        <div class="field full-row">
+          <label for="backAddress">寄回地址（客户地址）</label>
+          <textarea id="backAddress" name="backAddress" placeholder="详细地址 / 备注说明"></textarea>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary">＋ 新增出库记录</button>
+        </div>
+      </form>
+
+      <p class="small">
+        使用流程：<br>
+        · 设备出库：在上面填写信息 → 点“新增出库记录”。<br>
+        · 设备回库：在下面明细表中找到对应记录 → 点“回库”按钮即可（不用再新建一条）。<br>
+        · 系统会根据“出库时间 / 回库时间”自动得出每天出去了几台、回来了几台。
+      </p>
+    </div>
+
+    <!-- 右侧：统计信息 & 每日出入 -->
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          汇总统计
+          <span class="pill">金额 + 设备</span>
+        </div>
+        <div class="card-title-right">
+          数据仅保存在当前浏览器
+        </div>
+      </div>
+
+      <!-- 金额统计 -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">记录数量</div>
+          <div class="stat-value" id="statCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">总收入（金额）</div>
+          <div class="stat-value stat-income" id="statIncome">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">总支出（金额 + 邮费）</div>
+          <div class="stat-value stat-expense" id="statExpense">￥0.00</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">净收益（收入 - 支出）</div>
+          <div class="stat-value stat-balance" id="statBalance">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">邮费合计</div>
+          <div class="stat-value" id="statShipping">￥0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">最近一笔时间</div>
+          <div class="stat-value" id="statLastTime">—</div>
+        </div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="pill-filter" id="filterGroup">
+            <button type="button" data-filter="all" class="active">全部记录</button>
+            <button type="button" data-filter="income">仅收入</button>
+            <button type="button" data-filter="expense">仅支出</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button id="exportCsvBtn" class="btn btn-secondary">导出 CSV</button>
+          <button id="clearAllBtn" class="btn btn-danger">清空全部</button>
+        </div>
+      </div>
+
+      <!-- 每日设备出入统计 -->
+      <div style="margin-top:6px;">
+        <div class="card-title" style="margin-bottom:4px;">
+          <div class="card-title-left" style="font-size:13px;">
+            每日设备出 / 回统计
+            <span class="pill">按日期汇总</span>
+          </div>
+        </div>
+        <div class="table-wrapper small-table">
+          <table>
+            <thead>
+            <tr>
+              <th>日期</th>
+              <th>出去台数</th>
+              <th>回来台数</th>
+              <th>当日净变化</th>
+              <th>累计在外</th>
+            </tr>
+            </thead>
+            <tbody id="dayStatsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="small">
+        说明：<br>
+        · “出去台数”来自该日的出库时间；“回来台数”来自该日的回库时间。<br>
+        · “净变化” = 出去台数 - 回来台数；“累计在外” = 从第一天累计至今还在外面的数量。
+      </p>
+    </div>
+  </div>
+
+  <!-- 明细表格 -->
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left">
+        记录明细
+        <span class="pill" id="recordSummary">共 0 条</span>
+      </div>
+      <div class="card-title-right">
+        未回库记录可在此直接点“回库”
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>序列</th>
+          <th>时间</th>
+          <th>设备编号</th>
+          <th>状态</th>
+          <th>机型</th>
+          <th>客户信息</th>
+          <th>收支类型</th>
+          <th>金额</th>
+          <th>邮费</th>
+          <th>寄出单号</th>
+          <th>寄回地址</th>
+          <th>寄回单号</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="recordTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'rental_single_record_v1';
+
+  let records = [];
+  let currentFilter = 'all'; // all | income | expense
+
+  function loadRecords() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      records = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.error('加载本地数据失败', e);
+      records = [];
+    }
+  }
+
+  function saveRecords() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const pad = n => n.toString().padStart(2, '0');
+    return (
+      d.getFullYear() + '-' +
+      pad(d.getMonth() + 1) + '-' +
+      pad(d.getDate()) + ' ' +
+      pad(d.getHours()) + ':' +
+      pad(d.getMinutes())
+    );
+  }
+
+  function getDateKey(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr.slice(0, 10);
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
+  function getFilteredRecords() {
+    if (currentFilter === 'all') return records;
+    return records.filter(r => r.ioType === currentFilter);
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('recordTableBody');
+    tbody.innerHTML = '';
+
+    const list = getFilteredRecords();
+
+    list.forEach((r, idx) => {
+      const tr = document.createElement('tr');
+
+      const seqTd = document.createElement('td');
+      seqTd.textContent = idx + 1;
+      tr.appendChild(seqTd);
+
+      const timeTd = document.createElement('td');
+      const outText = formatDate(r.startTime);
+      const backText = r.endTime ? formatDate(r.endTime) : '';
+      timeTd.innerHTML = outText
+        ? `<div>出库：${outText}</div>${backText ? `<div>回库：${backText}</div>` : ''}`
+        : '';
+      tr.appendChild(timeTd);
+
+      const deviceTd = document.createElement('td');
+      deviceTd.textContent = r.deviceId || '';
+      tr.appendChild(deviceTd);
+
+      const statusTd = document.createElement('td');
+      const statusTag = document.createElement('span');
+      if (r.endTime) {
+        statusTag.className = 'tag tag-status-back';
+        statusTag.textContent = '已回库';
+      } else {
+        statusTag.className = 'tag tag-status-out';
+        statusTag.textContent = '在外';
+      }
+      statusTd.appendChild(statusTag);
+      tr.appendChild(statusTd);
+
+      const modelTd = document.createElement('td');
+      modelTd.textContent = r.model || '';
+      tr.appendChild(modelTd);
+
+      const customerTd = document.createElement('td');
+      customerTd.textContent = r.customer || '';
+      tr.appendChild(customerTd);
+
+      const ioTypeTd = document.createElement('td');
+      const tag = document.createElement('span');
+      tag.className = 'tag ' + (r.ioType === 'income' ? 'tag-income' : 'tag-expense');
+      tag.textContent = r.ioType === 'income' ? '收入' : '支出';
+      ioTypeTd.appendChild(tag);
+      tr.appendChild(ioTypeTd);
+
+      const amountTd = document.createElement('td');
+      if (r.amount != null) {
+        amountTd.textContent = r.amount.toFixed(2);
+        amountTd.className = r.ioType === 'income' ? 'amount-income' : 'amount-expense';
+      } else {
+        amountTd.textContent = '';
+      }
+      tr.appendChild(amountTd);
+
+      const shippingTd = document.createElement('td');
+      if (r.shipping != null && !isNaN(r.shipping)) {
+        shippingTd.textContent = r.shipping.toFixed(2);
+      } else {
+        shippingTd.textContent = '';
+      }
+      tr.appendChild(shippingTd);
+
+      const outNoTd = document.createElement('td');
+      outNoTd.textContent = r.outNo || '';
+      tr.appendChild(outNoTd);
+
+      const backAddrTd = document.createElement('td');
+      backAddrTd.textContent = r.backAddress || '';
+      tr.appendChild(backAddrTd);
+
+      const backNoTd = document.createElement('td');
+      backNoTd.textContent = r.backNo || '';
+      tr.appendChild(backNoTd);
+
+      const actionTd = document.createElement('td');
+      actionTd.className = 'td-actions';
+
+      const realIndex = records.indexOf(r);
+
+      const returnBtn = document.createElement('button');
+      returnBtn.className = 'btn btn-secondary';
+      if (r.endTime) {
+        returnBtn.textContent = '已回库';
+        returnBtn.disabled = true;
+      } else {
+        returnBtn.textContent = '回库';
+        returnBtn.onclick = () => {
+          if (!confirm('确认将本条记录标记为“已回库”？')) return;
+          r.endTime = new Date().toISOString();
+          saveRecords();
+          renderTable();
+          updateStats();
+        };
+      }
+      actionTd.appendChild(returnBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '删除';
+      delBtn.className = 'btn btn-ghost';
+      delBtn.style.marginLeft = '4px';
+      delBtn.onclick = () => {
+        if (confirm('确定删除这条记录吗？')) {
+          if (realIndex > -1) {
+            records.splice(realIndex, 1);
+            saveRecords();
+            renderTable();
+            updateStats();
+          }
+        }
+      };
+      actionTd.appendChild(delBtn);
+
+      tr.appendChild(actionTd);
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('recordSummary').textContent =
+      `共 ${records.length} 条（当前显示：${list.length} 条）`;
+  }
+
+  function computeDayStats() {
+    const map = {};
+    records.forEach(r => {
+      if (r.startTime) {
+        const keyOut = getDateKey(r.startTime);
+        if (keyOut) {
+          if (!map[keyOut]) map[keyOut] = { out: 0, back: 0 };
+          map[keyOut].out += 1;
+        }
+      }
+      if (r.endTime) {
+        const keyBack = getDateKey(r.endTime);
+        if (keyBack) {
+          if (!map[keyBack]) map[keyBack] = { out: 0, back: 0 };
+          map[keyBack].back += 1;
+        }
+      }
+    });
+    return map;
+  }
+
+  function renderDayStats() {
+    const tbody = document.getElementById('dayStatsBody');
+    tbody.innerHTML = '';
+
+    const map = computeDayStats();
+    const dates = Object.keys(map).sort();
+
+    let running = 0;
+    if (dates.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.textContent = '暂无数据';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    dates.forEach(date => {
+      const { out, back } = map[date];
+      const delta = out - back;
+      running += delta;
+
+      const tr = document.createElement('tr');
+
+      const dateTd = document.createElement('td');
+      dateTd.textContent = date;
+      tr.appendChild(dateTd);
+
+      const outTd = document.createElement('td');
+      outTd.textContent = out;
+      tr.appendChild(outTd);
+
+      const backTd = document.createElement('td');
+      backTd.textContent = back;
+      tr.appendChild(backTd);
+
+      const deltaTd = document.createElement('td');
+      deltaTd.textContent = (delta >= 0 ? '+' : '') + delta;
+      tr.appendChild(deltaTd);
+
+      const runningTd = document.createElement('td');
+      runningTd.textContent = running;
+      tr.appendChild(runningTd);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateStats() {
+    const totalCount = records.length;
+    let totalIncome = 0;
+    let totalExpenseAmount = 0;
+    let totalShipping = 0;
+
+    records.forEach(r => {
+      const amount = r.amount || 0;
+      const shipping = r.shipping || 0;
+
+      if (r.ioType === 'income') {
+        totalIncome += amount;
+      } else {
+        totalExpenseAmount += amount;
+      }
+      if (!isNaN(shipping)) {
+        totalShipping += shipping;
+      }
+    });
+
+    const totalExpense = totalExpenseAmount + totalShipping;
+    const balance = totalIncome - totalExpense;
+
+    document.getElementById('statCount').textContent = totalCount;
+    document.getElementById('statIncome').textContent = '￥' + totalIncome.toFixed(2);
+    document.getElementById('statExpense').textContent = '￥' + totalExpense.toFixed(2);
+    document.getElementById('statBalance').textContent = '￥' + balance.toFixed(2);
+    document.getElementById('statShipping').textContent = '￥' + totalShipping.toFixed(2);
+
+    if (records.length > 0) {
+      const latestTimes = records
+        .map(r => r.endTime || r.startTime)
+        .filter(Boolean)
+        .sort((a, b) => new Date(b) - new Date(a));
+      document.getElementById('statLastTime').textContent =
+        latestTimes.length ? formatDate(latestTimes[0]) : '—';
+    } else {
+      document.getElementById('statLastTime').textContent = '—';
+    }
+
+    renderDayStats();
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    const startTime = form.time.value;
+    const deviceId = form.deviceId.value.trim();
+    const model = form.model.value.trim();
+    const customer = form.customer.value.trim();
+    const ioType = form.ioType.value || 'income';
+    const amount = parseFloat(form.amount.value || '0');
+    const shipping = parseFloat(form.shipping.value || '0');
+    const outNo = form.outNo.value.trim();
+    const backAddress = form.backAddress.value.trim();
+    const backNo = form.backNo.value.trim();
+
+    const record = {
+      startTime,
+      endTime: null, // 回库时间，初始为 null，点“回库”按钮后填入
+      deviceId,
+      model,
+      customer,
+      ioType,
+      amount: isNaN(amount) ? 0 : amount,
+      shipping: isNaN(shipping) ? 0 : shipping,
+      outNo,
+      backAddress,
+      backNo
+    };
+
+    records.push(record);
+    saveRecords();
+    renderTable();
+    updateStats();
+
+    form.reset();
+    document.getElementById('ioType').value = 'income';
+    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+  }
+
+  function exportToCsv() {
+    if (records.length === 0) {
+      alert('没有可导出的数据');
+      return;
+    }
+
+    const header = [
+      '序列',
+      '出库时间',
+      '回库时间',
+      '设备编号',
+      '机型',
+      '客户信息',
+      '收支类型',
+      '金额(￥)',
+      '邮费(￥)',
+      '寄出单号',
+      '寄回地址',
+      '寄回单号'
+    ];
+
+    const rows = records.map((r, idx) => [
+      idx + 1,
+      formatDate(r.startTime),
+      r.endTime ? formatDate(r.endTime) : '',
+      r.deviceId || '',
+      r.model || '',
+      r.customer || '',
+      r.ioType === 'income' ? '收入' : '支出',
+      (r.amount || 0).toFixed(2),
+      (r.shipping || 0).toFixed(2),
+      r.outNo || '',
+      (r.backAddress || '').replace(/\n/g, ' '),
+      r.backNo || ''
+    ]);
+
+    const csvArray = [header, ...rows]
+      .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csvArray], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nowStr = new Date().toISOString().slice(0, 10);
+    a.download = `租赁账目导出_${nowStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAll() {
+    if (!confirm('这将删除当前浏览器中所有记录，确定要清空吗？')) return;
+    records = [];
+    saveRecords();
+    renderTable();
+    updateStats();
+  }
+
+  function bindFilterButtons() {
+    const group = document.getElementById('filterGroup');
+    group.addEventListener('click', (e) => {
+      if (e.target.tagName.toLowerCase() !== 'button') return;
+      const type = e.target.getAttribute('data-filter');
+      if (!type) return;
+      currentFilter = type;
+      [...group.querySelectorAll('button')].forEach(btn => {
+        btn.classList.toggle('active', btn === e.target);
+      });
+      renderTable();
+    });
+  }
+
+  function init() {
+    loadRecords();
+    renderTable();
+    updateStats();
+
+    const form = document.getElementById('recordForm');
+    form.addEventListener('submit', handleFormSubmit);
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+    bindFilterButtons();
+
+    document.getElementById('time').value = new Date().toISOString().slice(0, 16);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
